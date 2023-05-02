@@ -1,0 +1,183 @@
+------------------------------------------------------------
+-- PROGRAM DEFINITION
+--------------------- 
+-- A program is a sequence of definitions.
+PDefs. Program ::= [Def] ;
+
+-- The terminator directive is used to specify the symbol that should be used to terminate instances of a nonterminal
+-- The separator directive is used to specify the symbol that should be used to separate instances of a nonterminal
+terminator Def "" ;  
+------------------------------------------------------------
+-- FUNCTION DEFINITION
+----------------------
+-- A function definition has a type, a name, an argument and a body.
+-- An Argument list is a comma-seperated of argument declarations enclosed in parentheses.
+-- A function body is a list of statments enclosed in curly brackets.
+
+FunDefWithBody.             Def ::= Type  Id "(" [Arg] ")" "{" [Stm] "}" ;                          -- int add(int x, int y) {return x + y;}
+FunDefWithoutBody.          Def ::= Type  Id "(" [Arg] ")" ";" ;                                 -- int add(int x, int y)
+
+InlineDefWithBody.          Def ::= "inline" Type  Id "(" [Arg] ")" "{" [Stm] "}" ;              -- inline int add(int x, int y) {return x + y;}
+InlineDefWithoutBody.       Def ::= "inline" Type  Id "(" [Arg] ")" ";" ;                     -- inline int add(int x, int y)
+
+-------------------------
+-- Structure declarations
+-------------------------
+DStructDecl.                Struct ::= "struct" Id "{" [Variable] "}" ";";  
+-- struct Person {
+--    std::string name;
+--    int age;
+--   };
+
+SStructDef.                 Stm ::= Struct ;
+-- struct {
+--    int x;
+--    int y;} point = {3, 4};
+
+DStructDef.                 Def ::= Struct ;  
+-- Person p = {"Alice", 25};
+
+--------------------------------------------
+-- Variable definition, declaration and statements
+--------------------------------------------
+DVarDef.                     Def ::= Variable ";";                               -- int a = 5;
+SVarStm.                     Stm ::= Variable ";";                               -- int b;   b = 10;
+VIdList.                     Variable ::= Type [IdList]  ;                       -- int x, y, z;
+--------------------------------------------
+-- TypeDef Declaration
+--------------------------------------------
+FTopTypedef.                Def ::= Typedef ;                           -- typedef int myInt;
+STypedef.                   Stm ::= Typedef ;                           -- struct person { string name; };
+DTypedef.                   Typedef ::= "typedef" Type Id ";" ;         -- typedef person person_t;
+
+--------------------------------------------
+-- Argument/Using Declaration
+--------------------------------------------
+-- Define a function "sum" that takes two integers as arguments and returns their sum
+-- int sum(int x, int y) {
+--     return x + y;}
+
+ATypeDecl.                   Arg ::= Type ;                 -- Arg ::= "int";
+ADeclId.                     Arg ::= Type IdList ;          -- Arg ::= "int" "x" "y";             
+DUsingDef.                   Def ::= "using" QConst ";" ;   -- Def ::= "using" "namespace" "std" ";" ;
+
+----------------
+-- STATMENTS
+----------------
+SExp.           Stm ::= Exp ";" ;                                       -- Any statment followed by a semicolon ";" can be used as a statment.
+SReturn.        Stm ::= "return" Exp ";" ;                              -- Statment returning an expression.
+SWhile.         Stm ::= "while" "(" Exp ")" Stm ;                       -- While loops, with an expression in parentheses followed by a statment
+SDoWhile.       Stm ::= "do" Stm "while" "(" Exp ")" ";" ;              -- Do-While loops, with an expression in parentheses after the loop body.
+SFor.           Stm ::= "for" "(" Variable ";" Exp ";" Exp ")" Stm ;    -- For loops, with a declaration and two expressions in parentheses followed by a statment.
+SIf.            Stm ::= "if" "(" Exp ")" Stm ;                          -- If with an expression in parentheses followed by a statment.
+SIfElse.        Stm ::= "if" "(" Exp ")" Stm "else" Stm ;               -- If-Else with an expression in parentheses followed by two statments and by else and statment.
+SBlock.         Stm ::= "{" [Stm] "}" ;                                 -- Any list of statments including empty lists enclosed in curly brackets.
+
+separator   Arg "," ;
+terminator  Stm "" ;
+terminator Variable ";" ;  
+
+------------------------------------------------------------
+-- EXPRESSIONS
+--------------
+EInt.                   Exp15 ::= Integer ; 
+EDouble.                Exp15 ::= Double ; 
+EChar.                  Exp15 ::= Char ;
+EString.                Exp15 ::= [String] ; -- "Hello World" ", hi"
+
+EQConstant.             Exp15 ::= QConst ;
+ETrue.                  Exp15 ::= "true" ;
+EFalse.                 Exp15 ::= "false" ;
+
+EIndexing .             Exp14 ::= Exp14 "["Exp"]" ; -- Left Associative
+EFunctionCall.          Exp14 ::= Exp14 "(" [Exp] ")" ; -- Left Associative
+EStructureProjection2.  Exp14 ::= Exp14 "->" Exp15 ; -- Left Associative 
+EStructureProjection1.  Exp14 ::= Exp14 "." Exp15 ; -- Left Associative 
+EDecrementLeft.         Exp14 ::= Exp14 "--" ; -- left Associative
+EIncrementRightleft.    Exp14 ::= Exp14 "++" ; -- left Associative
+
+ENegation.              Exp13 ::= "!" Exp13 ; -- Right Associative
+EDereference.           Exp13 ::= "*" Exp13 ; -- Right Associative
+EDecrementRight.        Exp13 ::= "--" Exp13 ; -- Right Associative
+EIncrementRight.        Exp13 ::= "++" Exp13 ; -- Right Associative
+EUnaryMinus.            Exp13 ::= "-" Exp13 ; -- Right Associative 
+EUnaryPlus.             Exp13 ::= "+" Exp13 ; -- Right Associative
+         
+EReminder.              Exp12 ::= Exp12 "%" Exp13 ; -- Left Associative
+EDivision.              Exp12 ::= Exp12 "/" Exp13 ; -- Left Associative
+EMultiplication.        Exp12 ::= Exp12 "*" Exp13 ; -- Left Associative
+
+ESubtraction.           Exp11 ::= Exp11 "-" Exp12 ; -- Left Associative
+EAddition.              Exp11 ::= Exp11 "+" Exp12 ; -- Left Associative
+
+ERightShift.            Exp10 ::= Exp10 ">>" Exp11 ; -- Left Associative
+ELeftShift.             Exp10 ::= Exp10 "<<" Exp11 ; -- Left Associative
+
+EEquivalent.            Exp9 ::= Exp9 "<=>" Exp10 ; -- Left Associative
+ELessOrEqualThan.       Exp9 ::= Exp9 "<=" Exp10 ; -- Left Associative
+EGreaterOrEqualThan.    Exp9 ::= Exp9 ">=" Exp10 ; -- Left Associative
+EGreaterThan.           Exp9 ::= Exp9 ">"  Exp10 ; -- Left Associative
+ELessThan.              Exp9 ::= Exp9 "<"  Exp10 ; -- Left Associative
+
+EInequality.            Exp8 ::= Exp8 "!=" Exp9 ; -- Left Associative
+EEquality.              Exp8 ::= Exp8 "==" Exp9 ; -- Left Associative
+
+EConjunction.           Exp4 ::= Exp4 "&&" Exp5 ; -- Left Associative
+
+EDisjunction.           Exp3 ::= Exp3 "||" Exp4 ; -- Left Associative
+
+EAssignment1.           Exp2 ::= Exp3 "+=" Exp2 ; -- Right Associative
+EAssignment2.           Exp2 ::= Exp3 "-=" Exp2 ; -- Right Associative
+EAssignment3.           Exp2 ::= Exp3 "=" Exp2 ; -- Right Associative
+ECondition.             Exp2 ::= Exp3 "?" Exp2 ":" Exp2 ; -- Right Associative
+
+ECoReturn.              Exp1 ::= "co_return" Exp ; -- Right Associative
+ECoYield.               Exp1 ::= "co_yield" Exp ; -- Right Associative
+ECoAwait.               Exp1 ::= "co_await" Exp ; -- Right Associative
+
+internal ETyped. Exp15 ::= "(" Exp ":" Type ")" ;
+
+coercions Exp 15 ;
+separator nonempty String "" ;
+separator Exp "," ; 
+
+------------------------------------------------------------
+-- QUALIFIED CONSTANTS AND TEMPLATE INSTANTIATIONS
+--------------------------------------------------
+TTempInstant.               TempInstant ::= Id "<" [Type] ">" ;     -- Names can be Identifiers but also template instantiations.
+QQConst.                    QConst      ::= [Name];                 -- Qualified constants are constant names.
+
+rules Name ::= Id | TempInstant ;
+separator nonempty Name "::" ;                                      -- nonempty because a qualified constant must have at least one nam
+
+-- Typelist is a comma-separated list of types. 
+separator nonempty Type "," ;
+
+------------------------
+-- TYPES Definition
+------------------------
+rules Type       ::= "const" BType | "constinit" AType | AType "&" | AType ;
+rules AType      ::= "const" GType | GType ;
+rules BType      ::= "constinit" GType | GType ;
+rules GType      ::= "int" | "bool" | "char" | "double" | "void" | QConst ;
+
+----------------------
+-- Token & IDENTIFIERS
+----------------------
+-- An Identifier is a letter followed by a list of letters, digits and underscores.
+-- Regular Expression: [a-zA-Z][a-zA-Z0-9_]*
+token Id (letter (letter | digit | '_')*) ;
+
+rules IdList ::= Id | Id "=" Exp ;
+separator nonempty IdList "," ;
+
+------------------------------------------------------------
+-- COMMENTS AND PREPROCESSOR DIRECTIVES
+---------------------------------------
+-- a programm my contain comments and preprocessor directives
+
+comment "/*" "*/" ; -- multi line comments
+comment "//" ; -- single line comments
+comment "#" ; -- preprocessor directives
+------------------------------------------------------------
+
