@@ -1,0 +1,156 @@
+----------------------------------------------------------------------------
+------------------------------- TASK 2 -------------------------------------
+----------------------------------------------------------------------------
+-- PROGRAM DEFINITION
+----------------------------------------------------------------------------
+-- A program is a list of definitions (function, struct, method, variable, constant) 
+PDefs.      Program ::= [Def] ; 
+
+----------------------------------------------------------------------------
+-- FUNCTION DEFINITION
+----------------------------------------------------------------------------
+-- A function definition consists of a type, function name, a list of Arguments, a list of Statement
+DFun.            Def ::= "func" Id "(" [Argument] ")" Type "{" [Statment] "}" ;
+DFunWithoutType. Def ::= "func" Id "(" [Argument] ")" "{" [Statment] "}" ;
+
+----------------------------------------------------------------------------
+-- STRUCT DEFINITION
+----------------------------------------------------------------------------
+-- A struct definition consists of a type, struct name, a list of Field 
+DStruct.    Def ::= "type" Id "struct" "{" [Field] "}" ;
+
+----------------------------------------------------------------------------
+-- METHOD DEFINITION
+----------------------------------------------------------------------------
+-- A method definition consists of a type, method name, a list of Argument, a list of Statment 
+DMethode.                Def ::= "func" "(" Id Type ")" Id "(" Argument ")" Type "{" [Statment] "}" ;
+DMethodeWithoutType.     Def ::= "func" "(" Id Type ")" Id "(" Argument ")" "{" [Statment] "}" ;
+
+terminator Def "" ;
+----------------------------------------------------------------------------
+-- IMPORT AND PACKAGE DEFINITIONS
+----------------------------------------------------------------------------
+DImport.   Def ::= "import" Library ;
+-- DImport1.  Def ::= "import" "(" [Library] ")" ;
+DPackage.  Def ::= "package" Id ;
+----------------------------------------------------------------------------
+-- FUNCTION DECLARATION
+----------------------------------------------------------------------------
+-- A function declaration consists of a type, function name, a list of Argument 
+FDeclaration.     Field ::= Id Type ;
+
+terminator        Field ";" ;
+
+----------------------------------------------------------------------------
+-- ARGUMENT DECLARATION
+----------------------------------------------------------------------------
+-- An argument declaration consists of a type, argument name 
+AArgument.  Argument ::= Id Type ;
+separator   Argument  ",";
+----------------------------------------------------------------------------
+-- STATEMENTS
+----------------------------------------------------------------------------
+-- A statement is a list of Statment 
+
+SExprssion.      Statment    ::= Expression ";" ;                         
+SDeclaration.    Statment    ::= Declaration ";" ;
+SSimpleStatment. Statment    ::= SimpleStatment ";" ;   
+SReturn.         Statment    ::= "return" Expression ";" ; 
+SReturnV.        Statment    ::= "return" ";" ;
+SWhile.          Statment    ::= "for" Expression "{" [Statment] "}" ;
+SFor.            Statment    ::= "for" SimpleStatment ";" Expression ";" Expression "{" [Statment] "}" ;
+SForSimple.      Statment    ::= "for" Statment "{" [Statment] "}";
+SBlock.          Statment    ::= "{" [Statment] "}" ;
+SIf.             Statment    ::= "if"  Expression "{" [Statment] "}" ;
+SIfSimple.       Statment    ::= "if"  SimpleStatment ";" Expression  "{" [Statment] "}" ;
+SIfElse.         Statment    ::= "if"  Expression  "{" [Statment] "}" "else" "{" [Statment] "}" ;
+SIfElseSimple.   Statment    ::= "if"  SimpleStatment ";" Expression  "{" [Statment] "}" "else" "{" [Statment] "}" ;
+
+-- terminator for statment 
+terminator Statment "" ; 
+----------------------------------------------------------------------------
+-- declaration of constants or variables 
+rules Declaration::= ConstDeclaration | VariableDeclaration ; 
+
+DConstant. ConstDeclaration ::= "const" ConstSpecification ; 
+rules ConstSpecification ::= [Id] "=" [Expression] | [Id] Type "=" [Expression] ;
+
+DVariable. VariableDeclaration   ::= "var" VariableSpecification ;
+rules VariableSpecification ::= [Id] Type | [Id] Type "=" [Expression] | [Id] "=" [Expression];
+
+rules SimpleStatment ::= ShortVariableDeclaration ;
+
+SDVar. ShortVariableDeclaration ::= [Id] ":=" [Expression] ;
+----------------------------------------------------------------------------
+-- EXPRESSIONS
+----------------------------------------------------------------------------
+ETrue.   Expression15  ::= "true" ;
+EFalse.  Expression15  ::= "false" ;
+EInt.    Expression15  ::= Integer ;
+EDouble. Expression15  ::= Double ;
+EId.     Expression15  ::= Id ;
+
+EApp.    Expression14  ::= Id "(" [Expression] ")" ;
+EProj.   Expression14  ::= Expression14 "." Field ;
+
+FStatment. Field  ::= Id;
+FStatmentMethode. Field ::= Id "(" [Expression] ")" ;
+
+EPIncr.  Expression14  ::= Expression14 "++" ;
+EPDecr.  Expression14  ::= Expression14 "--" ;
+
+EIncr.   Expression13  ::= "++" Expression13 ;
+EDecr.   Expression13  ::= "--" Expression13 ;
+EUPlus.  Expression13  ::= "+" Expression13 ;
+EUMinus. Expression13  ::= "-" Expression13 ;
+ENeg.    Expression13  ::= "!" Expression13 ;
+
+ETimes.  Expression12  ::= Expression12 "*"   Expression13 ;    
+EDiv.    Expression12  ::= Expression12 "/"   Expression13 ; 
+
+EPlus.   Expression11  ::= Expression11 "+"   Expression12 ;
+EMinus.  Expression11  ::= Expression11 "-"   Expression12 ;
+ETwc.    Expression10  ::= Expression10 "<=>" Expression11 ;
+ELt.     Expression9   ::= Expression9  "<"   Expression10 ;
+EGt.     Expression9   ::= Expression9  ">"   Expression10 ;
+ELtEq.   Expression9   ::= Expression9  "<="  Expression10 ;
+EGtEq.   Expression9   ::= Expression9  ">="  Expression10 ;
+EEq.     Expression8   ::= Expression8  "=="  Expression9 ;
+ENEq.    Expression8   ::= Expression8  "!="  Expression9 ;
+EAnd.    Expression4   ::= Expression4  "&&"  Expression5 ;
+EOr.     Expression3   ::= Expression3  "||"  Expression4 ;
+EAss.    Expression2   ::= Expression3  "="   Expression2 ;
+EAssadd. Expression2   ::= Expression3  "+="  Expression2 ;
+EAssSub. Expression2   ::= Expression3  "-="  Expression2 ; 
+----------------------------------------------------------------------------
+
+coercions Expression 15 ;
+
+separator Expression "," ;
+
+----------------------------------------------------------------------------
+-- TYPES
+----------------------------------------------------------------------------
+-- basic types 
+rules Type ::= "bool" | "int" | Id | "string"; 
+
+separator Type "," ; 
+
+----------------------------------------------------------------------------
+-- LITERALS
+----------------------------------------------------------------------------
+token Id (letter (letter | digit | '_')*) ;     
+token Library ('"' (letter | digit | '_' | '/' | '.')* '"') ;
+
+separator nonempty Id "," ; 
+-- separator nonempty Library "," ;
+----------------------------------------------------------------------------
+-- COMMENTS
+----------------------------------------------------------------------------
+-- preprocessor comment  
+comment "#" ;   
+-- single line comment                              
+comment "//" ; 
+-- multi line comment                                      
+comment "/*" "*/" ;                
+----------------------------------------------------------------------------
